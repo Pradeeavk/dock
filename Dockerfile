@@ -10,6 +10,5 @@ COPY html/ /usr/share/nginx/html/
 # Expose port 80 to the outside world
 EXPOSE 80
 
-# Optional: Keep Nginx running in the foreground
-CMD ["nginx", "-g", "daemon off;"]
+
 
