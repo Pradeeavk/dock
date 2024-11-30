@@ -5,7 +5,7 @@ FROM nginx:latest
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy the static content (HTML, CSS) into the Nginx web root
-COPY html/ /usr/share/nginx/html/
+COPY docker_nginix/html/ /usr/share/nginx/html/
 
 # Expose port 80 to the outside world
 EXPOSE 80
