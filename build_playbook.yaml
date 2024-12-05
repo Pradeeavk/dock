@@ -1,49 +1,32 @@
-- name: Build CentOS Docker Image using Ansible and Run Container
-  hosts: all
-  become: yes  # Run as root to execute Docker commands
+
+- name: Build and Run Docker Container
+  hosts: remote
+  become: true  # Optional: use this if you need elevated privileges to run Docker
+  vars:
+    remote_server_ip: "172.31.24.159"   # Example, replace with actual IP
+    remote_server_user: "linux"          # Example, replace with actual user
 
   tasks:
-    - name: Ensure Docker is installed
-      yum:
-        name: docker
-        state: present
-
-    - name: Start Docker service
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Build Docker image from Dockerfile
+    # Task 1: Build Docker Image
+    - name: Build Docker Image
       docker_image:
-        build: /root/docker_nginix/Dockerfile # Provide the path where your Dockerfile is located
-        name: nila_kavi  # Name of the image you want to build
-        tag: latest  # Tag the image as 'latest'
+        build:
+          path: /root/dock/  # Path to the directory containing the Dockerfile
+        name: nila_kavi
+        tag: latest
 
-    - name: Verify Docker image was created
-      command: docker images centos_custom_image:latest
-      register: result
-      changed_when: false
-
-    - name: Display Docker image details
-      debug:
-        msg: "Docker image created: {{ result.stdout }}"
-
-    - name: Run Docker container from the created image
+    # Task 2: Run Docker Container
+    - name: Run Docker container
       docker_container:
-        name: my_cent_container  # Name for the running container
-        image: nila_kavi:latest  # Image to use for the container
-        state: started  # Ensure the container is running
+        name: nila_kavi_container
+        image: nila_kavi:latest
+        state: started
+        restart_policy: always
         ports:
-          - "9090:80"  # Map port 80 inside the container to port 8080 on the host
-        detach: yes  # Run the container in detached mode (in the background)
-
-    - name: Verify Docker container is running
-      command: docker ps
-      register: ps_result
-      changed_when: false
-
-    - name: Display running Docker container details
-      debug:
-        msg: "Running Docker container: {{ ps_result.stdout }}"
+          - "1010:80"
+        env:
+          REMOTE_SERVER_IP: "{{ remote_server_ip }}"
+          REMOTE_SERVER_USER: "{{ remote_server_user }}"
+        volumes:
+          - /home/ec2-user/.ssh/id_rsa:/root/.ssh/id_rsa  # Mount the SSH key into the container
 
