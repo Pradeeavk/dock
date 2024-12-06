@@ -1,5 +1,5 @@
 - name: copy module
-  hosts: ansible
+  hosts: all
   become: true
   tasks:
     - name: Copy file with owner and permissions
