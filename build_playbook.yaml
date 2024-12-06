@@ -49,7 +49,7 @@
 
     - name: run docker 
       ansible.builtin.command:
-        cmd: docker run -itd --name prakash -p 8083:8080 app
+        cmd: docker run -itd --name prakash -p 80:80 app
 
 
     - name: remove file
