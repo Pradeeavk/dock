@@ -1,33 +1,64 @@
-
-- name: Build and Run Docker Container
-  hosts: remote
-  become: true  # Optional: use this if you need elevated privileges to run Docker
-  vars:
-    remote_server_ip: "172.31.24.159"   # Example, replace with actual IP
-    remote_server_user: "linux"          # Example, replace with actual user
-    ansible_ssh_private_key_file: /home/ec2-user/.ssh/prd.pem
-    
+- name: copy module
+  hosts: ansible
+  become: true
   tasks:
-    # Task 1: Build Docker Image
-    - name: Build Docker Image
-      docker_image:
-        build:
-          path: /root/dock/  # Path to the directory containing the Dockerfile
-        name: nila_kavi
-        tag: latest
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: /var/lib/jenkins/workspace/docker_file/Dockerfile
+        dest: /home/ec2-user
+        mode: '0644'
 
-    # Task 2: Run Docker Container
-    - name: Run Docker container
-      docker_container:
-        name: nila_kavi_container
-        image: nila_kavi:latest
-        state: started
-        restart_policy: always
-        ports:
-          - "2020:80"
-        env:
-          REMOTE_SERVER_IP: "{{ remote_server_ip }}"
-          REMOTE_SERVER_USER: "{{ remote_server_user }}"
-        volumes:
-          - /home/ec2-user/.ssh/id_rsa:/root/.ssh/id_rsa  # Mount the SSH key into the container
+
+    - name: Copy file html
+      ansible.builtin.copy:
+        src: /var/lib/jenkins/workspace/docker_file/html
+        dest: /home/ec2-user
+        mode: '0644'
+
+    - name: Copy file nginx
+      ansible.builtin.copy:
+        src: /var/lib/jenkins/workspace/docker_file/nginx.conf
+        dest: /home/ec2-user
+        mode: '0644'
+
+    - name: Install docker
+      ansible.builtin.command:
+        cmd: yum update -y && yum install docker -y
+
+        
+
+    - name: start docker
+      ansible.builtin.command:
+        cmd: sudo systemctl enable docker
+
+    - name: start dockers
+      ansible.builtin.command:
+        cmd: sudo systemctl start docker
+
+    - name: permission
+      ansible.builtin.command:
+        cmd: chmod 777 /var/run/docker.sock
+
+    - name: Run the Linux command
+      ansible.builtin.command:
+        cmd: docker build -t app .
+
+    - name: remove previous container
+      ansible.builtin.command:
+        cmd: docker rm -f prakash
+
+    - name: run docker 
+      ansible.builtin.command:
+        cmd: docker run -itd --name prakash -p 8083:8080 app
+
+
+    - name: remove file
+      ansible.builtin.command:
+        cmd: rm -f /home/ec2-user/Dockerfile
+
+    
+
+    
+
+
 
