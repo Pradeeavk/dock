@@ -1,0 +1,6 @@
+FROM  tomcat:latest
+WORKDIR /seppu
+ADD root/sample.war /usr/local/tomcat/webapps
+RUN sed -i 's/8080/9090/' /usr/local/tomcat/conf/server.xml
+Expose 9090   
+cmd ["catalina.sh", "run"]
